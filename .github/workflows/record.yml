@@ -1,0 +1,23 @@
+name: nightly record
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/record_day.js
+      - name: commit the new lines
+        run: |
+          git config user.name "prova-record"
+          git config user.email "prova-record@users.noreply.github.com"
+          git add data/record.json
+          git diff --cached --quiet && echo "no new closed day" || git commit -m "record $(date -u +%F)"
+          git push
